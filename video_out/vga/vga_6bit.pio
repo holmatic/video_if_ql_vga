@@ -1,0 +1,30 @@
+
+.program vga
+
+.wrap_target
+    out pins, 8
+
+//    set x 16
+//delay:
+//    jmp x-- delay  [ 31 ]
+
+.wrap
+
+%c-sdk {
+static inline void vga_program_init(PIO pio, uint sm, uint offset, uint pin_base, float clock_div) {
+  const uint pin_count = 8;
+  for (uint i = 0; i < pin_count; i++) {
+      pio_gpio_init(pio, pin_base+i);
+  }
+  pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true);
+
+  pio_sm_config cfg = vga_program_get_default_config(offset);
+  sm_config_set_out_pins(&cfg, pin_base, pin_count);
+  sm_config_set_out_shift(&cfg, true, true, 0);
+  sm_config_set_fifo_join(&cfg, PIO_FIFO_JOIN_TX);
+  sm_config_set_clkdiv(&cfg, clock_div);
+  pio_sm_init(pio, sm, offset, &cfg);
+  
+  pio_sm_set_enabled(pio, sm, true);
+}
+%}
