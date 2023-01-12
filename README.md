@@ -71,9 +71,11 @@ Raspberry Pi Pico needs a standard USB power suppy (needs <100mA, so no special 
 
 (Ehem - yes I know but it works ;-)
 
-# Downloading the firmware to the Pi Pico
+# Loading the Firmware into the Pi Pico
 
 Pi Pico operates like a USB memory stick when pushing the BOOTSEL button during while plugging into the USB port of a computer. Put the firmware "video_if_ql_vga.uf2" onto the drive. LED should show short flashes with a period of about 2 seconds. Please also refer to the Pi Pico documentation regarding firmware programming.
+
+https://github.com/holmatic/video_if_ql_vga/releases
 
 ### Version Info
 
