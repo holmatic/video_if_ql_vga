@@ -2,18 +2,20 @@
 
 This project creates the firmware for a DIY video interface based on the Rapsberry Pi Pico controller. It allows to connect a Sinclair QL computer to a standard VGA monitor.
 
+![Screen](doc/QLpicoVGA_screenshot.jpg "VGA Monitor Connected to the QL")
+
 One difficulty when using an old Sinclair QL nowadays is finding monitor that works well. The QL video output is a bit non-standard, many displays do not show the full 512 horizontal pixel, but instead crop the screen in some way.
 
-This small Video-to VGA converter project is specially made for the QL signal and translates the 512x256 pixel screen to a standard pseudo-XGA resolution (1024x768 with a single QL pixel translating to a block of 2x3 XGA pixels). The Gold Standard for such a translation is the "QL-VGA" FPGA-based device by MarcelK. This project is a pure software implementation, utilizing the highly configurable I/O of the RP2040 and its DMA capabilities for signal input and output. Phase and frequency detection is done by the CPU utilizing fixed-point arithmetics.
+This small Video-to VGA converter project is specially made for the QL signal and translates the 512x256 pixel screen to a standard pseudo-XGA resolution (1024x768 with a single QL pixel translating to a block of 2x3 XGA pixels). The Gold Standard for such a translation is the "QL-VGA" FPGA-based device by MarcelK. This project is a µC based C/C++ implementation, utilizing the highly configurable I/O of the RP2040 and its DMA capabilities for signal input and output. Phase and frequency detection and adjustment is done by the CPU on the fly utilizing fixed-point arithmetics.
 
-- The VGA signal generation uses _MoeFH_'s simple but great DMA-driven approach for the low-level part. Kudos to _MoeFH_!
-- QL video signals are sampled at 32Ms/s - with the QL Pixel clock running at 10MHz
-- All timing parameters are specifically preset for the QL's video output, so the software will definitely not work well with any other video source, it is not meant as a generic RGB-to-VGA converter.
-- As a small diagnostic aid, the "No Signal" bluescreen shows a simplified logic-analyzer type of graph for the input signals
+- The VGA signal generation uses _MoeFH_'s simple but clever DMA-driven approach for the low-level part. Kudos to _MoeFH_!
+- QL video signals are sampled at 32MS/s - with the QL Pixel clock running at 10MHz
+- All timing parameters are specifically preset for the QL's video output, so the software will definitely not work well with any other video source, the project is not meant as a generic RGB-to-VGA converter.
+- As a small diagnostic aid, the unavoidable "No Signal" bluescreen shows a simplified logic-analyzer type of graph for the input signals
 
 ## Hardware
 
-This project is based on a Raspberry Pi Pico board and only needs a few additional components (Resistors) for voltage level translation:
+This project is based on a Raspberry Pi Pico board and only needs a few additional components (resistors) for voltage level translation:
 
 
 ![Schematic outline](doc/Connecting.png "How to connect QL, Pi Pico, and the VGA Monitor")
@@ -57,11 +59,17 @@ GND=Pin23  ------------------- 6,7,8,10,5 (GND)
 Note: Place all resistors close to the Pi Pico module (<5cm) for best signal integrity.
 
 
+
 ## Power Supply Input
 
 Raspberry Pi Pico needs a standard USB power suppy (needs <100mA, so no special requirements for the power supply). Some VGA monitors may even provide USB voltage via an integrated USB hub. 
 
+## 1st Prototype
 
+
+![Prototype](doc/QLpicoVGA_proto.jpg "Quick-n-dirty prototype")
+
+(Ehem - yes I know but it works ;-)
 
 # Downloading the firmware to the Pi Pico
 
