@@ -25,11 +25,12 @@ struct ScreenParameters{
 // Specific parameters for the video input signal 
 namespace scrpara{
     constexpr ScreenParameters QL_SCR_PARA = ScreenParameters{512, 256, 640, 27, 109, 64};
+    constexpr ScreenParameters ZXSP23_SCR_PARA = ScreenParameters{320, 240, 448+6+2, 36, 100, 64};
 };
 class VideoInProc{
 
 public:
-    explicit VideoInProc(InputSampler* sampler, pixel_t* screenbuf);
+    explicit VideoInProc(InputSampler* sampler, pixel_t* screenbuf, VidType vt);
 
     bool ProcessFrame(uint32_t diag_display_lines=0);
 
@@ -42,7 +43,7 @@ private:
     static const uint32_t SMPLFREQ_HZ = 32000000;
     static const size_t ADJUST_BUF_SAMPLES = 32;
 
-    static constexpr ScreenParameters SCR = scrpara::QL_SCR_PARA;
+    ScreenParameters SCR;
 
 
     sample_t GetSample();
@@ -66,5 +67,6 @@ private:
     uint32_t vsync_cycle_min_;
 
     uint32_t diag_duration_us_;
+    VidType vt_;
 
 };

@@ -13,7 +13,11 @@ static const uint32_t SAMPLEIN_PIN_BASE =  2;
 static const uint32_t USER_PUSHBUTTON_PIN =  1;
 static const bool INCREASED_SYS_CLOCK =  true;
 
-
+enum VidType{
+    QL_NATIVE,
+    ZX_SP_PLUS23,
+    INVALID
+};
 
 #ifdef __cplusplus
 extern "C" {

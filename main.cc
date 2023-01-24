@@ -79,6 +79,7 @@ size_t fw_check_diag_printf_(char* readbuf){
 namespace{
 
     void show_upper_diagnostics(VideoWindow& w1, InputSampler& ismp, bool nosignal){
+
         const uint32_t SAMPLESIZE=8192;
         // read some sampled data, first dummy read to recover from overrrun condition
         ismp.GetNextSampleBuffer();
@@ -98,12 +99,14 @@ namespace{
         pixel_t c_lo = PixelFromRGB(255, 255, 255);
         pixel_t c_bg = PixelFromRGB(64, 64, 128);
 
-        w1.SetXyPos(65,25,2);
-        w1.PrintF("QL pico VGA Adapter");
-        w1.SetXyPos(325,33);
-        w1.PrintF("by ZX TEAM (2023)");
+        //w1.SetXyPos(65,25,2);
+        //w1.PrintF("QL pico VGA Adapter");
+        w1.SetXyPos(5,5,2);
+        w1.PrintF("Sinclair Pico VGA Adapter");
+        w1.SetXyPos(w1.getScrWidthPixel()+325-512,33);
+        w1.PrintF("by ZX TEAM 2023");
 
-        float xscale = 460.0 / SAMPLESIZE;
+        float xscale = (w1.getScrWidthPixel()-52.0) / SAMPLESIZE;  // 460
 
         w1.SetXyPos(3, 66);
         w1.PrintF("CSync");
@@ -135,23 +138,26 @@ namespace{
                 }
             }
         }
-        w1.SetXyPos(185, 145 ,2);
+        w1.SetXyPos(w1.getScrWidthPixel()/2 + 185-256, 145 ,2);
         w1.PrintF(nosignal ? " Signal ? ": "           " );
-        w1.SetXyPos(465,205);
-        w1.PrintF("v0.01");
+        w1.SetXyPos(w1.getScrWidthPixel()+465-512,205);
+        w1.PrintF("v0.zx0");
     }
 
 
 
-    void run_main_loop_forever(pixel_t* video_buffer)
+    void run_main_loop_forever(pixel_t* video_buffer, VidType vt)
     {
         const uint32_t diag_lines=20;
-        VideoRenderer v(video_buffer);
-        VideoWindow w1(&v,0, 256-diag_lines, PixelFromRGB(0, 255, 255), PixelFromRGB(64, 64, 128));
-        VideoWindow w2(&v, 256-diag_lines,256, PixelFromRGB(128, 128, 128), PixelFromRGB(64, 64, 128));
-        InputSampler ismp(SAMPLEIN_PIN_BASE, 32000000);
-        VideoInProc vid_in(&ismp, video_buffer);
 
+        uint16_t scwidth = vt==QL_NATIVE ? 512: 320;
+        uint16_t scheight = vt==QL_NATIVE ? 256: 240;
+        VideoRenderer v(video_buffer, scwidth, scheight);
+        VideoWindow w1(&v,0, scheight-diag_lines, PixelFromRGB(0, 255, 255), PixelFromRGB(64, 64, 128));
+        VideoWindow w2(&v, scheight-diag_lines,scheight, PixelFromRGB(128, 128, 128), PixelFromRGB(64, 64, 128));
+
+        InputSampler ismp(SAMPLEIN_PIN_BASE, 32000000);
+        VideoInProc vid_in(&ismp, video_buffer, vt);
 
         uint32_t ok_frames=1;
         uint32_t failed_frames=0;
@@ -160,9 +166,9 @@ namespace{
 
         // Draw some fancy initial pattern for the initial screen.
         auto c=PixelFromRGB(255, 0, 0);
-        for(uint32_t y=0; y<256; y+=4){
-            for(uint32_t x=0; x<512; x+=4){
-                if(y%32==16 || x%44==36) video_buffer[y*512+x]=c;
+        for(uint32_t y=0; y<scheight; y+=4){
+            for(uint32_t x=0; x<scwidth; x+=4){
+                if(y%32==16 || x%44==36) video_buffer[y*scwidth+x]=c;
             }
         }
 
@@ -213,7 +219,7 @@ namespace{
     }
 
 
-    void init_low_level_parts(pixel_t** framebuffer_pt){
+    void init_low_level_parts(pixel_t** framebuffer_pt, VidType vt){
 
         stdio_init_all();
 
@@ -257,7 +263,9 @@ namespace{
         }
 
         // Init the VGA library. If for some reason this does not work (out of mem), show a blinking pattern on the LED.
-        if (vga_init(&vga_mode_512x256 , VGA_PIN_BASE, reinterpret_cast<void**>(framebuffer_pt)) < 0) {
+        VGA_MODE vgamode = (vt==QL_NATIVE) ? vga_mode_512x256 : vga_mode_320x240;
+        
+        if (vga_init(&vgamode , VGA_PIN_BASE, reinterpret_cast<void**>(framebuffer_pt)) < 0) {
             printf("ERROR initializing VGA\n");
             fflush(stdout);
             while(1){
@@ -275,8 +283,9 @@ namespace{
 
 
 int main(void){
+    VidType vt = ZX_SP_PLUS23;    
     pixel_t* framebuffer;
-    init_low_level_parts(&framebuffer);
-    run_main_loop_forever(framebuffer);
+    init_low_level_parts(&framebuffer, vt);
+    run_main_loop_forever(framebuffer, vt);
     return 1;
 } 

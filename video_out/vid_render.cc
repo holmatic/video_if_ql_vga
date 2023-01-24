@@ -16,8 +16,8 @@ pixel_t PixelFromRGB(uint8_t r, uint8_t g, uint8_t b){
 }
 
 
-VideoRenderer::VideoRenderer(pixel_t* video_buffer)
-    : video_buf_(video_buffer)
+VideoRenderer::VideoRenderer(pixel_t* video_buffer, int16_t width, int16_t height)
+    : ScreenWidth(width), ScreenHeight(height), video_buf_(video_buffer)
 {
     ClearScreen(PixelFromRGB(255, 255, 255));
 }
@@ -26,8 +26,8 @@ VideoRenderer::VideoRenderer(pixel_t* video_buffer)
 void VideoRenderer::ClearScreen(pixel_t color)
 {
     pixel_t* pt = video_buf_;
-    for(int16_t y=0; y<kScreenHeight; y++){
-        for(int16_t x=0; x<kScreenWidth; x++){
+    for(int16_t y=0; y<ScreenHeight; y++){
+        for(int16_t x=0; x<ScreenWidth; x++){
             *pt++ = color;
         }
     }
@@ -36,7 +36,7 @@ void VideoRenderer::ClearScreen(pixel_t color)
 
 pixel_t* VideoRenderer::GetAddrFromPos(int16_t xpos, int16_t ypos)
 {
-    pixel_t* addr = &video_buf_[xpos+VideoRenderer::kScreenWidth*ypos];
+    pixel_t* addr = &video_buf_[xpos+ScreenWidth*ypos];
     return addr;
 }
 
@@ -83,6 +83,7 @@ void VideoWindow::NewLine()
 
 void VideoWindow::PutChar(uint16_t character)
 {
+    auto lwidth=getScrWidthPixel();
     if(clear_pending_) Clear();
     if(scroll_pending_){
         Scroll(kCharHight*charscale_);
@@ -98,7 +99,7 @@ void VideoWindow::PutChar(uint16_t character)
                     *pos_addr_++ = (pattern&0x20) ? fg_color_ : bg_color_;
                     pattern <<= 1;
                 }
-                pos_addr_ += VideoRenderer::kScreenWidth-kCharWidth;
+                pos_addr_ += lwidth-kCharWidth;
             }
             xpos_ += kCharWidth;
         } else  {
@@ -108,13 +109,13 @@ void VideoWindow::PutChar(uint16_t character)
                     auto p = (pattern&0x20) ? fg_color_ : bg_color_;
                     for(int ysc=0; ysc < charscale_; ysc++){
                         for(int xsc=0; xsc < charscale_; xsc++){
-                            pos_addr_[ysc*VideoRenderer::kScreenWidth + xsc] = p;
+                            pos_addr_[ysc*lwidth + xsc] = p;
                         }
                     }
                     pos_addr_+=charscale_;
                     pattern <<= 1;
                 }
-                pos_addr_ += charscale_ * (VideoRenderer::kScreenWidth-kCharWidth);
+                pos_addr_ += charscale_ * (lwidth-kCharWidth);
             }
             xpos_ += kCharWidth*charscale_;
         }
@@ -142,14 +143,15 @@ void VideoWindow::SetXyPos(int16_t x_pos, int16_t y_pos, int16_t charscale){
 
 void VideoWindow::Scroll(uint16_t num_pix)
 {
+    auto lwidth= getScrWidthPixel();
     pixel_t* dest = GetAddrFromPos(0, 0);
     pixel_t* src = GetAddrFromPos(0, num_pix);
-    uint16_t skippix = VideoRenderer::kScreenWidth-xend_+xstart_;
+    uint16_t skippix = lwidth-xend_+xstart_;
     int16_t y;
     for(y=ystart_; y+num_pix<yend_; y++){
         memcpy(dest, src, (xend_*xstart_)*sizeof(pixel_t));
-        src += VideoRenderer::kScreenWidth;
-        dest+= VideoRenderer::kScreenWidth;
+        src += lwidth;
+        dest+= lwidth;
     }
     for(; y<yend_; y++){
         for(int16_t x=xstart_; x<xend_; x++){
@@ -171,7 +173,7 @@ void VideoWindow::Clear()
         for(int16_t x=xstart_; x<xend_; x++){
             *pt++ = bg_color_;
         }
-        pt += VideoRenderer::kScreenWidth-xend_+xstart_;
+        pt += getScrWidthPixel()-xend_+xstart_;
     }
 }
 
