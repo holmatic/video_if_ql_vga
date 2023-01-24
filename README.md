@@ -20,6 +20,9 @@ This project is based on a Raspberry Pi Pico board and only needs a few addition
 
 ![Schematic outline](doc/Connecting.png "How to connect QL, Pi Pico, and the VGA Monitor")
 
+```
+Controller Module: Raspberry Pi Pico 
+```
 
 
 ## QL to Pico:
