@@ -41,6 +41,8 @@
 #include "hardware/irq.h"
 #include "hardware/structs/bus_ctrl.h"
 
+#include "../../system_defs.h"
+
 #include "vga_6bit.h"
 #include "vga_6bit.pio.h"
 
@@ -67,6 +69,7 @@ const static struct VGA_MODE *vga_mode = NULL;
 #define H_FULL_LINE   (H_FRONT_PORCH+H_SYNC_PULSE+H_BACK_PORCH+H_PIXELS)
 #define V_FULL_FRAME  (V_FRONT_PORCH+V_SYNC_PULSE+V_BACK_PORCH+V_PIXELS)
 
+
 #define HSYNC_ON           (!H_POLARITY)
 #define HSYNC_OFF          ( H_POLARITY)
 #define VSYNC_ON           (!V_POLARITY)
@@ -74,7 +77,12 @@ const static struct VGA_MODE *vga_mode = NULL;
 #define HBLANK_BUFFER_LEN  ((H_FRONT_PORCH+H_SYNC_PULSE+H_BACK_PORCH)/4)
 #define HPIXELS_BUFFER_LEN (H_PIXELS/4)
 
+#ifdef VIDOUT_SYNC_BITS
+#define SYNC_BITS     VIDOUT_SYNC_BITS
+#else
 #define SYNC_BITS     ((VSYNC_OFF<<7) | (HSYNC_OFF<<6))
+#endif
+
 #define SCREEN_WIDTH  H_PIXELS
 #define SCREEN_HEIGHT (V_PIXELS/V_DIV)
 
@@ -183,7 +191,7 @@ static int init_pio(unsigned int pin_out_base)
 
 static void clear_framebuffer(uint fb_num, uint8_t color)
 {
-  uint8_t val = SYNC_BITS | (color & 0x3f);
+  uint8_t val = SYNC_BITS | (color & ~SYNC_BITS);
   memset(framebuffers[fb_num], val, SCREEN_WIDTH*SCREEN_HEIGHT);
 }
 
@@ -232,11 +240,18 @@ static int init_buffers(int num_framebuffers)
     return VGA_ERROR_ALLOC;
   }
 
+#ifdef VIDOUT_SYNC_BITS
+  uint8_t sync_h0v0 = VIDOUT_VSYNC_BITS | VIDOUT_HSYNC_BITS;
+  uint8_t sync_h1v0 = VIDOUT_VSYNC_BITS | 0                ;
+  uint8_t sync_h0v1 = 0                 | VIDOUT_HSYNC_BITS;
+  uint8_t sync_h1v1 = 0                 | 0                ;
+#else
   uint8_t sync_h0v0 = (VSYNC_OFF<<7) | (HSYNC_OFF<<6);
   uint8_t sync_h1v0 = (VSYNC_OFF<<7) | (HSYNC_ON <<6);
   uint8_t sync_h0v1 = (VSYNC_ON <<7) | (HSYNC_OFF<<6);
   uint8_t sync_h1v1 = (VSYNC_ON <<7) | (HSYNC_ON <<6);
-  
+#endif
+
   // hblank lines
   unsigned char *hblank_vsync_on   = (unsigned char *) hblank_buffer_vsync_on;
   unsigned char *hblank_vsync_off  = (unsigned char *) hblank_buffer_vsync_off;

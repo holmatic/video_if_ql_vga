@@ -249,7 +249,7 @@ bool VideoInProc::ProcessFrame(uint32_t diag_display_lines){
                 // running into buffer end limit
                 while(read_hrix < BUF_SIZE_HR){
                     pixel_t col = rd_buf_[read_hrix.index()];
-                    col|=0xc0;
+                    col|=VIDOUT_SYNC_BITS;
                     *scr_wr++=col;
                     read_hrix += pixel_hrdur;
                     pix++;
@@ -266,7 +266,7 @@ bool VideoInProc::ProcessFrame(uint32_t diag_display_lines){
                 // just free running till end of line
                 while(pix < SCR.num_hori_displ_pixel){
                     pixel_t col = rd_buf_[read_hrix.index()];
-                    col|=0xc0;
+                    col|=VIDOUT_SYNC_BITS;
                     *scr_wr++=col;
                     read_hrix += pixel_hrdur;
                     pix++;

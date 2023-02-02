@@ -5,6 +5,7 @@
 #include "pico/stdlib.h"   // sleep_us etc
 #include "pico/stdio.h"  
 #include "vid_render.h"
+#include "../system_defs.h"
 
 #include "charset_code.inc"  // const uint8_t charset16x6[]
 
@@ -12,7 +13,7 @@
 
 
 pixel_t PixelFromRGB(uint8_t r, uint8_t g, uint8_t b){
-    return (0xc0  | (b&0xc0) >> 2) | ((g&0xc0) >> 4)| ((r&0xc0) >> 6);
+    return (VIDOUT_SYNC_BITS  | (b&0xc0) >> 2) | ((g&0xc0) >> 4)| ((r&0xc0) >> 6);
 }
 
 
