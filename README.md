@@ -83,10 +83,15 @@ https://github.com/holmatic/video_if_ql_vga/releases
 ### Version Info
 
 0.01 Initial version
+
 0.02 Mini-Pico (RP-2040-Zero) variant:
+
     Hsync and Vsync outputs are duplicated to accomodate for the shrinked layout:
+
      GP16-out = GP12-out = VGA-HSYNC
+
      GP17-out = GP14-out = VGA-VSYNC
+
     Please note that the RP-2040-Zero RGB LED is NOT supported, it will not light up or flash.
 
 
