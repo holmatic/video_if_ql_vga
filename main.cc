@@ -138,7 +138,7 @@ namespace{
         w1.SetXyPos(185, 145 ,2);
         w1.PrintF(nosignal ? " Signal ? ": "           " );
         w1.SetXyPos(435,205);
-        w1.PrintF("mini v0.02");
+        w1.PrintF("mini v0.02b");
     }
 
 
