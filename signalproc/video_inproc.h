@@ -37,8 +37,8 @@ public:
 
 private:
 
-    static const sample_t SMPL_VSYNC = 0x80;
-    static const sample_t SMPL_ANYCOLOR = 0x15;
+    static const sample_t SMPL_VSYNC = 2; // 0x80;
+    static const sample_t SMPL_ANYCOLOR = 1; // 0x15;
     static const uint32_t SMPLFREQ_HZ = 32000000;
     static const size_t ADJUST_BUF_SAMPLES = 32;
 

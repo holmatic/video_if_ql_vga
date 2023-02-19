@@ -99,7 +99,7 @@ namespace{
         pixel_t c_bg = PixelFromRGB(64, 64, 128);
 
         w1.SetXyPos(65,25,2);
-        w1.PrintF("QL pico VGA Adapter");
+        w1.PrintF("NU1500 VGA Adapter");
         w1.SetXyPos(325,33);
         w1.PrintF("by ZX TEAM 2023");
 
@@ -138,7 +138,7 @@ namespace{
         w1.SetXyPos(185, 145 ,2);
         w1.PrintF(nosignal ? " Signal ? ": "           " );
         w1.SetXyPos(435,205);
-        w1.PrintF("mini v0.02b");
+        w1.PrintF("     v0.03a");
     }
 
 

@@ -13,7 +13,8 @@
 
 
 pixel_t PixelFromRGB(uint8_t r, uint8_t g, uint8_t b){
-    return (VIDOUT_SYNC_BITS  | (b&0xc0) >> 2) | ((g&0xc0) >> 4)| ((r&0xc0) >> 6);
+    //return (VIDOUT_SYNC_BITS  | (b&0xc0) >> 2) | ((g&0xc0) >> 4)| ((r&0xc0) >> 6);
+    return (VIDOUT_SYNC_BITS  | (b&0x80) >> 3)  | ((g&0x80) >> 4)| ((r&0x80) >> 5);
 }
 
 

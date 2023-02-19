@@ -12,7 +12,7 @@
 
 %c-sdk {
 static inline void vga_program_init(PIO pio, uint sm, uint offset, uint pin_base, float clock_div) {
-  const uint pin_count = 8;
+  const uint pin_count = 5;  // NU1500 from 8
   for (uint i = 0; i < pin_count; i++) {
       pio_gpio_init(pio, pin_base+i);
   }
