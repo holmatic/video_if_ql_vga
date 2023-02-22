@@ -29,11 +29,13 @@
 
 
 
-VideoInProc::VideoInProc(InputSampler* sampler, pixel_t* screenbuf)
+VideoInProc::VideoInProc(InputSampler* sampler, pixel_t* screenbuf, VidType vt)
  : sampler_(sampler), screenbuf_start_(screenbuf), rd_buf_(nullptr),
-    vsync_cycle_max_(0), vsync_cycle_min_(0), diag_duration_us_(0)
+    vsync_cycle_max_(0), vsync_cycle_min_(0), diag_duration_us_(0), vt_(vt)
 
-{ }
+{
+    SCR = scrpara::lookup[vt]; //   
+}
 
 void VideoInProc::PrintDiagInfo(){
     double syncline_us = vsync_cycle_ * 1e6 / SMPLFREQ_HZ;
@@ -45,9 +47,12 @@ void VideoInProc::PrintDiagInfo(){
         diag_printf(" BPorch %.2f pix |",porchdelay);
     }
     uint f_clk_sys = frequency_count_khz(CLOCKS_FC0_SRC_VALUE_CLK_SYS);
-    diag_printf(" Sysclk %d MHz |",f_clk_sys/1000);
-
-    diag_printf(" CpuLd %.1f%% | t=%dus |\n", sampler_->GetCpuLoadPercent(), diag_duration_us_);
+    if (vt_==QL_NATIVE){
+        diag_printf(" Sysclk %d MHz |",f_clk_sys/1000);
+        diag_printf(" CpuLd %.1f%% | t=%dus |\n", sampler_->GetCpuLoadPercent(), diag_duration_us_);
+    }
+    else
+        diag_printf("  t=%dus |\n", diag_duration_us_);
    
 }
 
@@ -216,23 +221,37 @@ bool VideoInProc::ProcessFrame(uint32_t diag_display_lines){
         }
 
         // check if we should now do some adjustments
-        if( (scanline&0x1F) == 0){
+        if( (scanline&0x1F) == 10){
             // do this only every now and then, to not put too much burden on a single buffer processing..
             if( read_hrix > pixel_hrdur && read_hrix + pixel_hrdur*SCR.num_hori_displ_pixel < BUF_SIZE_HR){
                 auto new_hrdur=hs_to_pixel_hrduration_;
-                // check for pixel oputside screen
-                if(rd_buf_[ (read_hrix-pixel_hrdur).index() ] & SMPL_ANYCOLOR ) new_hrdur+=pixel_hrdur;
-                if(rd_buf_[ (read_hrix+pixel_hrdur*SCR.num_hori_displ_pixel).index() ] & SMPL_ANYCOLOR ) new_hrdur-=pixel_hrdur;
-                // adjust on pixel transitions
-                auto adjust_hrix = read_hrix;
                 uint8_t numchanges=0;
-                pixel_t lastval=rd_buf_[adjust_hrix.index()];
-                for(uint32_t probe = 0; probe < 10; probe++){
-                    size_t ix = adjust_hrix.index();
-                    if(rd_buf_[ix]!=lastval) numchanges++;
-                    if(rd_buf_[ix-1] != rd_buf_[ix] ) new_hrdur += HR_SAMPLE_DUR/32; // need to sample later
-                    if(rd_buf_[ix+1] != rd_buf_[ix] ) new_hrdur -= HR_SAMPLE_DUR/32; // need to sample earlier
-                    adjust_hrix += pixel_hrdur;
+                auto adjust_hrix = read_hrix;
+                if (vt_==QL_NATIVE){
+                    // check for pixel oputside screen
+                    if(rd_buf_[ (read_hrix-pixel_hrdur).index() ] & SMPL_ANYCOLOR ) new_hrdur+=pixel_hrdur;
+                    if(rd_buf_[ (read_hrix+pixel_hrdur*SCR.num_hori_displ_pixel).index() ] & SMPL_ANYCOLOR ) new_hrdur-=pixel_hrdur;
+                    // adjust on pixel transitions
+                    pixel_t lastval=rd_buf_[adjust_hrix.index()];
+                    for(uint32_t probe = 0; probe < 10; probe++){
+                        size_t ix = adjust_hrix.index();
+                        if(rd_buf_[ix]!=lastval) numchanges++;
+                        if(rd_buf_[ix-1] != rd_buf_[ix] ) new_hrdur += HR_SAMPLE_DUR/32; // need to sample later
+                        if(rd_buf_[ix+1] != rd_buf_[ix] ) new_hrdur -= HR_SAMPLE_DUR/32; // need to sample earlier
+                        adjust_hrix += pixel_hrdur;
+                    }
+                }
+                else{
+                    // adjust on pixel transitions
+                    adjust_hrix += pixel_hrdur*40; // skip the border
+                    pixel_t lastval=rd_buf_[adjust_hrix.index()];
+                    for(uint32_t probe = 0; probe < 20; probe++){
+                        size_t ix = adjust_hrix.index();
+                        if(rd_buf_[ix]!=lastval) numchanges++;
+                        if(rd_buf_[ix-1] != rd_buf_[ix] ) new_hrdur += HR_SAMPLE_DUR/32; // need to sample later
+                        if(rd_buf_[ix+1] != rd_buf_[ix] ) new_hrdur -= HR_SAMPLE_DUR/32; // need to sample earlier
+                        adjust_hrix += pixel_hrdur;
+                    }
                 }
                 // We need at least two edges to not slip in one both direction.
                 // Also, make sure we do not move outside the rough 40..160 window, as default was 109 an no bigger deviation expected.
@@ -248,7 +267,7 @@ bool VideoInProc::ProcessFrame(uint32_t diag_display_lines){
             if(read_hrix + pixel_hrdur*(SCR.num_hori_displ_pixel-pix) >= BUF_SIZE_HR){
                 // running into buffer end limit
                 while(read_hrix < BUF_SIZE_HR){
-                    pixel_t col = rd_buf_[read_hrix.index()] & SMPL_ANYCOLOR ? VIDOUT_SYNC_BITS|4 : VIDOUT_SYNC_BITS;
+                    pixel_t col = rd_buf_[read_hrix.index()] & SMPL_ANYCOLOR ? VIDOUT_SYNC_BITS|12 : VIDOUT_SYNC_BITS;
                     // col|=VIDOUT_SYNC_BITS;
                     *scr_wr++=col;
                     read_hrix += pixel_hrdur;
@@ -265,7 +284,7 @@ bool VideoInProc::ProcessFrame(uint32_t diag_display_lines){
             } else {
                 // just free running till end of line
                 while(pix < SCR.num_hori_displ_pixel){
-                    pixel_t col = rd_buf_[read_hrix.index()] & SMPL_ANYCOLOR ? VIDOUT_SYNC_BITS|4 : VIDOUT_SYNC_BITS;
+                    pixel_t col = rd_buf_[read_hrix.index()] & SMPL_ANYCOLOR ? VIDOUT_SYNC_BITS|12 : VIDOUT_SYNC_BITS;
                     //pixel_t col = rd_buf_[read_hrix.index()];
                     //col|=VIDOUT_SYNC_BITS;
                     *scr_wr++=col;

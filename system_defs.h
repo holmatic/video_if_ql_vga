@@ -19,6 +19,13 @@ static const bool INCREASED_SYS_CLOCK =  true;
 #define VIDOUT_SYNC_BITS  (VIDOUT_VSYNC_BITS|VIDOUT_HSYNC_BITS)
 
 
+enum VidType{
+    QL_NATIVE,
+    ZX_SP_PLUS23,
+    ZX_NU_1500,
+    INVALID
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif

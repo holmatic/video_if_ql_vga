@@ -13,14 +13,14 @@ class VideoRenderer
 {
 public:
 
-    VideoRenderer(pixel_t* video_buffer);
+    VideoRenderer(pixel_t* video_buffer, int16_t width, int16_t height);
     void ClearScreen(pixel_t color);
 
     pixel_t* GetAddrFromPos(int16_t xpos, int16_t ypos);
-    void DrawPixelRaw(int16_t x, int16_t y,  pixel_t p) {if(y<kScreenHeight) video_buf_[kScreenWidth*y + x] = p; }
+    void DrawPixelRaw(int16_t x, int16_t y,  pixel_t p) {if(y<ScreenHeight) video_buf_[ScreenWidth*y + x] = p; }
 
-    static const int16_t kScreenWidth=512;
-    static const int16_t kScreenHeight=256;
+    int16_t ScreenWidth=512;
+    int16_t ScreenHeight=256;
 
 private:
     pixel_t* video_buf_; // Screen buffer
@@ -37,6 +37,7 @@ public:
     void DrawPixelRaw(int16_t x, int16_t y,  pixel_t p) {video_->DrawPixelRaw(x+xstart_,y+ystart_,p); }
     void MarkClearPending() {clear_pending_ = true;}
     void SetXyPos(int16_t x_pos, int16_t y_pos, int16_t charscale = 1);
+    uint16_t getScrWidthPixel() {return video_->ScreenWidth;}
 
 private:
     
