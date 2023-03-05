@@ -101,7 +101,7 @@ namespace{
         w1.SetXyPos(65,25,2);
         w1.PrintF("QL pico VGA Adapter");
         w1.SetXyPos(325,33);
-        w1.PrintF("by ZX TEAM (2023)");
+        w1.PrintF("by ZX TEAM 2023");
 
         float xscale = 460.0 / SAMPLESIZE;
 
@@ -138,7 +138,7 @@ namespace{
         w1.SetXyPos(185, 145 ,2);
         w1.PrintF(nosignal ? " Signal ? ": "           " );
         w1.SetXyPos(465,205);
-        w1.PrintF("v0.01");
+        w1.PrintF("v0.04");
     }
 
 
