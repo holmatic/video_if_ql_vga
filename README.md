@@ -72,13 +72,21 @@ Raspberry Pi Pico needs a standard USB power suppy (needs <100mA, so no special 
 
 ![Prototype](doc/QLpicoVGA_proto.jpg "Quick-n-dirty prototype")
 
-(Ehem - yes I know but it works ;-)
+(Ehem - yes I know but it works ;-)	
 
 # Loading the Firmware into the Pi Pico
 
 Pi Pico operates like a USB memory stick when pushing the BOOTSEL button during while plugging into the USB port of a computer. Put the firmware "video_if_ql_vga.uf2" onto the drive. LED should show short flashes with a period of about 2 seconds. Please also refer to the Pi Pico documentation regarding firmware programming.
 
 https://github.com/holmatic/video_if_ql_vga/releases
+
+## PCB and 3D Printable Case
+
+So [here](doc/pcb.md) for info on creating your own PCB and case
+
+![](doc/pcb.jpg)
+
+![](doc/case.jpg)
 
 ### Version Info
 
