@@ -227,7 +227,7 @@ bool VideoInProc::ProcessFrame(uint32_t diag_display_lines){
                 auto adjust_hrix = read_hrix;
                 uint8_t numchanges=0;
                 pixel_t lastval=rd_buf_[adjust_hrix.index()];
-                for(uint32_t probe = 0; probe < 10; probe++){
+                for(uint32_t probe = 0; probe < 24; probe++){
                     size_t ix = adjust_hrix.index();
                     if(rd_buf_[ix]!=lastval) numchanges++;
                     if(rd_buf_[ix-1] != rd_buf_[ix] ) new_hrdur += HR_SAMPLE_DUR/32; // need to sample later
