@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+
+
 #include "pico.h"
 #include "pico/stdlib.h"   // sleep_us etc
 #include "pico/util/queue.h"
@@ -138,7 +140,7 @@ namespace{
         w1.SetXyPos(185, 145 ,2);
         w1.PrintF(nosignal ? " Signal ? ": "           " );
         w1.SetXyPos(435,205);
-        w1.PrintF("mini v0.02b");
+        w1.PrintF("mini v0.02d");
     }
 
 
