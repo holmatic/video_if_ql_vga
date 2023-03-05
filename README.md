@@ -83,6 +83,7 @@ https://github.com/holmatic/video_if_ql_vga/releases
 ### Version Info
 
 0.01 Initial version
+
 0.05 Extend boot delay (startup fix for issue opbserved on some boards); minor adjustments to timing
 
 
