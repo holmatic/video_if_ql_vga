@@ -92,6 +92,9 @@ So [here](doc/pcb.md) for info on creating your own PCB and case
 
 0.01 Initial version
 
+0.05 Extend boot delay (startup fix for issue opbserved on some boards); minor adjustments to timing
+
+
 ---
 
 Instruction v1.0
